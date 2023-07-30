@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.Win32;
 using Perform_CRUD_Operations.Models;
 using Perform_CRUD_Operations.Services;
 
@@ -14,16 +15,27 @@ namespace Perform_CRUD_Operations.Pages.Admin.Products
          public int totalPages = 0;
          private readonly int pageSize = 5;
 
-         public List<Product> Products { get; set; } = new List<Product>();
+        //search functionality
+        public string search = "";
+
+        public List<Product> Products { get; set; } = new List<Product>();
 
          public IndexModel(ApplicationDbContext context)
          {
              this.context = context;
          }
-         public void OnGet(int? pageIndex)
+         public void OnGet(int? pageIndex, string? search)
          {
              IQueryable<Product> query = context.Products;
-             query = query.OrderByDescending(p => p.Id);
+
+             //search functionality
+             if(search != null)
+             {
+                this.search = search;
+                query = query.Where(p => p.Name.Contains(search) || p.Brand.Contains(search));
+             }
+
+            query = query.OrderByDescending(p => p.Id);
 
              // pagination functionality
              if (pageIndex == null || pageIndex < 1)
